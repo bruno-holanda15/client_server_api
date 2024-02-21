@@ -1,30 +1,21 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
-type DolarInfo struct {
-	USDBRL struct {
-		Code       string `json:"code"`
-		Codein     string `json:"codein"`
-		Name       string `json:"name"`
-		High       string `json:"high"`
-		Low        string `json:"low"`
-		VarBid     string `json:"varBid"`
-		PctChange  string `json:"pctChange"`
-		Bid        string `json:"bid"`
-		Ask        string `json:"ask"`
-		Timestamp  string `json:"timestamp"`
-		CreateDate string `json:"create_date"`
-	} `json:"USDBRL"`
-}
 
 func main() {
-	res, err := http.Get("http://localhost:8080/cotacao")
+	ctx, cancel := context.WithTimeout(context.Background(), 300 * time.Millisecond)
+	defer cancel()
+
+	reqToServer, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
+
+	res, err := http.DefaultClient.Do(reqToServer)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error ao executar chamada GET para /cotacao %s", err)
 		return
@@ -37,13 +28,6 @@ func main() {
 		return
 	}
 
-	var dolarInfo DolarInfo
-
-	err = json.Unmarshal(resCotacaoBody, &dolarInfo)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error ao transformar body para DolarInfo struct %s", err)
-		return
-	}
-
-	fmt.Println("Executado com sucesso", dolarInfo.USDBRL.Bid)
+	bid := string(resCotacaoBody)
+	fmt.Println("BID", bid)
 }

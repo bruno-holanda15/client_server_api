@@ -14,6 +14,10 @@ func main() {
 	defer cancel()
 
 	reqToServer, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error ao preparar requisição para o server localhost:8080 %s", err)
+		return
+	}
 
 	res, err := http.DefaultClient.Do(reqToServer)
 	if err != nil {
@@ -29,5 +33,5 @@ func main() {
 	}
 
 	bid := string(resCotacaoBody)
-	fmt.Println("BID", bid)
+	fmt.Println("BID", bid, "Status Code", res.StatusCode)
 }

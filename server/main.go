@@ -1,14 +1,14 @@
 package main
 
 import (
-	"server_api_go_expert/infra"
-	"server_api_go_expert/pkg"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"server_api_go_expert/infra"
+	"server_api_go_expert/pkg"
 	"time"
 )
 
@@ -21,12 +21,12 @@ func main() {
 
 type DolarInfo struct {
 	USDBRL struct {
-		Bid        string `json:"bid"`
+		Bid string `json:"bid"`
 	} `json:"USDBRL"`
 }
 
 func CotacaoDolar(res http.ResponseWriter, req *http.Request) {
-	ctxReqDolar, cancel := context.WithTimeout(context.Background(), 2000 * time.Millisecond)
+	ctxReqDolar, cancel := context.WithTimeout(context.Background(), 2000*time.Millisecond)
 	defer cancel()
 
 	reqDolar, err := http.NewRequestWithContext(ctxReqDolar, "GET", "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
@@ -55,15 +55,18 @@ func CotacaoDolar(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ctxDB, cancelDB := context.WithTimeout(context.Background(), 10 * time.Millisecond)
+	ctxDB, cancelDB := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancelDB()
 
 	db := pkg.ConnectionSQLite()
+	defer db.Close()
+
 	repository := infra.NewServerRepository(db)
 
 	err = repository.Insert(ctxDB, "dolar", dolarInfo.USDBRL.Bid)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error ao persistir bid no banco de dados %s\n", err)
+		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

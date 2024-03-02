@@ -1,6 +1,16 @@
 # Client Server API - Desafio Full Cycle Go Expert
 
-## Instruções
+# Organização
+O projeto foi separado em duas pastas principais, a do server e do client.
+
+# Instruções para rodar
+Para rodar a aplicação siga os passos abaixo:
+- Crie um arquivo server_database.db para o server, será necessário ter o sqlite instalado na máquina.
+- Acesse o database pelo comando `sqlite server_database.db` e rode o comando `CREATE TABLE cotacoes (coin text, bid text);` para criação da tabela cotacoes. 
+- Dentro da pasta server, rode o comando `go run main.go`, isso subirá o servidor da pasta para receber chamadas http.
+- Para executar a chamada para o server, dentro da pasta client rode o comando `go run main.go`, isso registrará a cotação de dólar dentro do arquivo cotacao.txt.
+
+## Proposta do projeto
 Olá dev, tudo bem?
 
 Neste desafio vamos aplicar o que aprendemos sobre webserver http, contextos,

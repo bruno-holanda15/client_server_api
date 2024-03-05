@@ -62,6 +62,12 @@ func (c *CotacaoDolarHTTP) CotacaoDolar(res http.ResponseWriter, req *http.Reque
 
 	repository := repositories.NewServerRepository(db)
 
+	err = repository.CreateTable()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error criando table cotacoes %s\n", err)
+		return
+	}
+
 	err = repository.Insert(ctxDB, "dolar", dolarInfo.USDBRL.Bid)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error ao persistir bid no banco de dados %s\n", err)

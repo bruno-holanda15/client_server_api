@@ -2,17 +2,19 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"server_api_go_expert/infra/repositories"
-	"server_api_go_expert/pkg"
 	"time"
 )
 
-type CotacaoDolarHTTP struct {}
+type CotacaoDolarHTTP struct {
+	db *sql.DB
+}
 
 type DolarInfo struct {
 	USDBRL struct {
@@ -20,12 +22,14 @@ type DolarInfo struct {
 	} `json:"USDBRL"`
 }
 
-func NewCotacaoDolarHTTP() *CotacaoDolarHTTP {
-	return &CotacaoDolarHTTP{}
+func NewCotacaoDolarHTTP(db *sql.DB) *CotacaoDolarHTTP {
+	return &CotacaoDolarHTTP{
+		db: db,
+	}
 }	
 
 func (c *CotacaoDolarHTTP) CotacaoDolar(res http.ResponseWriter, req *http.Request) {
-	ctxReqDolar, cancel := context.WithTimeout(context.Background(), 2000*time.Millisecond)
+	ctxReqDolar, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
 
 	reqDolar, err := http.NewRequestWithContext(ctxReqDolar, "GET", "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
@@ -57,16 +61,7 @@ func (c *CotacaoDolarHTTP) CotacaoDolar(res http.ResponseWriter, req *http.Reque
 	ctxDB, cancelDB := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancelDB()
 
-	db := pkg.ConnectionSQLite()
-	defer db.Close()
-
-	repository := repositories.NewServerRepository(db)
-
-	err = repository.CreateTable()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error criando table cotacoes %s\n", err)
-		return
-	}
+	repository := repositories.NewServerRepository(c.db)
 
 	err = repository.Insert(ctxDB, "dolar", dolarInfo.USDBRL.Bid)
 	if err != nil {

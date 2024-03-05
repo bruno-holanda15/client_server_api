@@ -27,6 +27,12 @@ func GetBid(ctx context.Context) (string, error) {
 		fmt.Fprintf(os.Stderr, "Error ao ler Body da request /cotacao %s\n", err)
 		return "", err
 	}
+
+	if res.StatusCode != 200 {
+		fmt.Fprintf(os.Stderr, "Error no retorno da request %s\n", err)
+		return "", err
+	}
+
 	fmt.Println("BID", string(resCotacaoBody), "Status Code", res.StatusCode)
 
 	return string(resCotacaoBody), nil
